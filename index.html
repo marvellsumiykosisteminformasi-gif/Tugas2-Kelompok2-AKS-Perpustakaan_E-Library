@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Library - Sistem Informasi Perpustakaan Digital</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#2563eb',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS for Wireframe Mode & Components -->
+    <style>
+        /* Wireframe Mode Custom Styles */
+        body.wireframe-mode {
+            font-family: 'JetBrains Mono', monospace !important;
+            background-color: #f8fafc !important;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+
+        body.wireframe-mode * {
+            box-shadow: none !important;
+            text-shadow: none !important;
+        }
+
+        body.wireframe-mode .bg-white,
+        body.wireframe-mode .bg-slate-50,
+        body.wireframe-mode .bg-slate-100,
+        body.wireframe-mode .bg-brand-50,
+        body.wireframe-mode .bg-brand-500,
+        body.wireframe-mode .bg-brand-600,
+        body.wireframe-mode .bg-emerald-600,
+        body.wireframe-mode .bg-indigo-600 {
+            background-color: #ffffff !important;
+            border: 2px solid #334155 !important;
+            color: #0f172a !important;
+        }
+
+        body.wireframe-mode .text-brand-600,
+        body.wireframe-mode .text-emerald-600,
+        body.wireframe-mode .text-amber-600,
+        body.wireframe-mode .text-indigo-600 {
+            color: #0f172a !important;
+            font-weight: 700;
+        }
+
+        body.wireframe-mode img {
+            filter: grayscale(100%) contrast(150%);
+            opacity: 0.6;
+            border: 2px dashed #475569 !important;
+        }
+
+        body.wireframe-mode .rounded-xl,
+        body.wireframe-mode .rounded-2xl,
+        body.wireframe-mode .rounded-lg,
+        body.wireframe-mode .rounded-full {
+            border-radius: 4px !important;
+        }
+
+        body.wireframe-mode .wf-badge {
+            border: 1px solid #0f172a !important;
+            background: #e2e8f0 !important;
+            color: #0f172a !important;
+        }
+
+        /* Smooth Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="h-full text-slate-800 antialiased flex flex-col transition-colors duration-200">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 lg:px-8 py-3 transition-all">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-brand-500/20">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                </div>
+                <div>
+                    <span class="text-lg font-bold bg-gradient-to-r from-brand-600 to-indigo-600 bg-clip-text text-transparent block leading-tight">
+                        E-Library System
+                    </span>
+                    <span class="text-xs text-slate-500 font-medium">Perpustakaan Digital Daerah</span>
+                </div>
+            </div>
+
+            <!-- Role & View Switcher Controls -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                
+                <!-- Wireframe Mode Toggle -->
+                <button id="wireframeToggleBtn" onclick="toggleWireframeMode()" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 hover:bg-slate-100 transition flex items-center gap-1.5 text-slate-700">
+                    <i class="fa-solid fa-border-all text-brand-600"></i>
+                    <span class="hidden sm:inline">Mode:</span>
+                    <span id="wireframeStatusText" class="text-brand-600">Hi-Fi Modern</span>
+                </button>
+
+                <!-- Role Selector Dropdown -->
+                <div class="relative inline-block text-left">
+                    <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                        <span class="text-xs font-semibold text-slate-500 pl-2 hidden md:inline"><i class="fa-solid fa-user-gear mr-1"></i> Peran:</span>
+                        <select id="roleSelector" onchange="changeUserRole(this.value)" class="bg-white text-xs font-bold text-slate-700 py-1.5 px-3 rounded-lg border-0 shadow-sm focus:ring-2 focus:ring-brand-500 cursor-pointer">
+                            <option value="anggota">🙋‍♂️ Anggota Perpustakaan</option>
+                            <option value="pustakawan">👨‍💼 Pustakawan (Admin)</option>
+                            <option value="kepala">👨‍💼 Kepala Perpustakaan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Notifications Button -->
+                <button onclick="toggleNotificationDropdown()" class="relative p-2 text-slate-600 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition">
+                    <i class="fa-regular fa-bell text-lg"></i>
+                    <span id="notifBadge" class="absolute top-1 right-1 w-2.5 h-2.5 bg-amber-500 rounded-full ring-2 ring-white"></span>
+                </button>
+
+                <!-- Login / Logout Button -->
+                <button id="authBtn" onclick="openLoginModal()" class="px-4 py-1.5 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <span>Masuk</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ROLE INDICATOR BANNER -->
+    <section id="roleBanner" class="bg-brand-50 border-b border-brand-100 py-2 px-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between text-xs text-brand-900 font-medium">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Aktif sebagai: <strong id="activeRoleLabel" class="font-bold text-brand-700">Anggota Perpustakaan (Siti Rahma)</strong></span>
+            </div>
+            <div id="roleHintText" class="hidden sm:block text-slate-500 text-[11px]">
+                Akses: Katalog, Peminjaman, E-book Reader, Reservasi, & Denda
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+
+        <!-- VIEW 1: ANGGOTA (MEMBER) DASHBOARD -->
+        <div id="viewAnggota" class="space-y-8">
+            
+            <!-- Hero Search Section -->
+            <section class="bg-gradient-to-br from-brand-900 via-brand-700 to-indigo-900 rounded-2xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 opacity-10 text-9xl text-white pointer-events-none">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <div class="max-w-2xl relative z-10 space-y-4">
+                    <span class="px-3 py-1 bg-white/20 backdrop-blur-md text-xs font-semibold rounded-full uppercase tracking-wider text-brand-100 inline-block">E-Library Portal</span>
+                    <h1 class="text-2xl sm:text-4xl font-extrabold leading-tight">Cari & Pinjam Koleksi Perpustakaan Digital</h1>
+                    <p class="text-brand-100 text-sm sm:text-base font-light">Akses ribuan buku fisik dan e-book interaktif secara praktis dari mana saja.</p>
+
+                    <!-- Search Input Box -->
+                    <div class="flex flex-col sm:flex-row items-center gap-2 pt-2">
+                        <div class="relative w-full">
+                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="searchInput" onkeyup="filterBooks()" placeholder="Cari judul buku, penulis, kategori, atau ISBN..." class="w-full pl-11 pr-4 py-3.5 text-sm rounded-xl text-slate-800 placeholder-slate-400 bg-white border-0 shadow-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        </div>
+                        <button onclick="filterBooks()" class="w-full sm:w-auto px-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                            <span>Cari</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    <!-- Filter Chips -->
+                    <div class="flex items-center gap-2 pt-2 flex-wrap text-xs">
+                        <span class="text-brand-200">Kategori Populer:</span>
+                        <button onclick="setCategoryFilter('all')" class="cat-chip active px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg transition font-medium">Semua</button>
+                        <button onclick="setCategoryFilter('Teknologi')" class="cat-chip px-3 py-1 bg-white/10 hover:bg-white/30 rounded-lg transition font-medium">💻 Pemrograman & IT</button>
+                        <button onclick="setCategoryFilter('Sains')" class="cat-chip px-3 py-1 bg-white/10 hover:bg-white/30 rounded-lg transition font-medium">🔬 Sains & Data</button>
+                        <button onclick="setCategoryFilter('Bisnis')" class="cat-chip px-3 py-1 bg-white/10 hover:bg-white/30 rounded-lg transition font-medium">📈 Bisnis & Manajemen</button>
+                        <button onclick="setCategoryFilter('E-Book')" class="cat-chip px-3 py-1 bg-emerald-500/80 hover:bg-emerald-500 rounded-lg transition font-medium">📖 E-Book Digital</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Member Summary Cards (Status Peminjaman & Denda) -->
+            <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500">Peminjaman Aktif</p>
+                        <h3 id="statActiveLoans" class="text-2xl font-bold text-slate-800 mt-1">2 Buku</h3>
+                        <p class="text-[11px] text-amber-600 font-medium mt-1"><i class="fa-solid fa-clock"></i> 1 Jatuh tempo minggu ini</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-book-reader"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500">Reservasi Buku</p>
+                        <h3 id="statReservations" class="text-2xl font-bold text-slate-800 mt-1">1 Buku</h3>
+                        <p class="text-[11px] text-emerald-600 font-medium mt-1"><i class="fa-solid fa-circle-check"></i> Siap diambil di rak</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-bookmark"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500">Tunggakan Denda</p>
+                        <h3 id="statTotalFines" class="text-2xl font-bold text-slate-800 mt-1">Rp 2.000</h3>
+                        <p class="text-[11px] text-rose-600 font-medium mt-1"><i class="fa-solid fa-triangle-exclamation"></i> 2 Hari Keterlambatan</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-coins"></i>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Book Catalog Section -->
+            <section class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Katalog Koleksi Terbaru</h2>
+                        <p class="text-xs text-slate-500">Menampilkan buku fisik dan koleksi e-book yang tersedia</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-500 font-medium">Tampilkan:</span>
+                        <select id="typeFilter" onchange="filterBooks()" class="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-brand-500">
+                            <option value="all">Semua Format</option>
+                            <option value="Fisik">Buku Fisik</option>
+                            <option value="Digital">E-Book Digital</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Book Cards Grid Container -->
+                <div id="bookGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Dynamic rendering via JavaScript -->
+                </div>
+            </section>
+
+            <!-- My Active Loans & Fines Section -->
+            <section class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-brand-600"></i>
+                        <span>Status Peminjaman Saya & Riwayat</span>
+                    </h3>
+                    <span class="text-xs bg-brand-50 text-brand-700 font-bold px-2.5 py-1 rounded-full">Batas Peminjaman: 14 Hari</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-600">
+                        <thead class="bg-slate-50 text-slate-700 uppercase font-semibold text-[11px] border-y border-slate-200">
+                            <tr>
+                                <th class="p-3">Judul Buku</th>
+                                <th class="p-3">Tgl Pinjam</th>
+                                <th class="p-3">Jatuh Tempo</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3">Denda Terhitung</th>
+                                <th class="p-3 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="memberLoansTable" class="divide-y divide-slate-100">
+                            <!-- Dynamic rendering via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- VIEW 2: PUSTAKAWAN (LIBRARIAN / ADMIN) DASHBOARD -->
+        <div id="viewPustakawan" class="space-y-8 hidden">
+            
+            <div class="bg-slate-900 text-white p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <span class="px-2.5 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-bold rounded-md">Modul Pustakawan</span>
+                    <h1 class="text-2xl font-bold mt-1">Manajemen Sirkulasi & Koleksi Buku</h1>
+                    <p class="text-slate-400 text-xs mt-1">Kelola transaksi peminjaman, verifikasi pengembalian, hitung denda, dan tambah stok buku.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="openAddBookModal()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Tambah Buku Baru</span>
+                    </button>
+                    <button onclick="triggerQuickScan()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl border border-slate-700 transition flex items-center gap-2">
+                        <i class="fa-solid fa-qrcode"></i>
+                        <span>Scan Barcode</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Circulation Quick Actions -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Quick Loan Processor -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right-arrow-left text-brand-600"></i>
+                        <span>Proses Peminjaman Baru</span>
+                    </h3>
+                    <form onsubmit="handleProcessLoan(event)" class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">ID Anggota / Email</label>
+                            <input type="text" id="loanMemberId" required placeholder="Contoh: AGT-001 atau siti@email.com" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Buku</label>
+                            <select id="loanBookSelect" required class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+                                <!-- Options populated via JS -->
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Tgl Pinjam</label>
+                                <input type="date" id="loanStartDate" value="2026-10-03" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-slate-50">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Jatuh Tempo (+14 Hari)</label>
+                                <input type="date" id="loanDueDate" value="2026-10-17" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-slate-50">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-lg transition shadow-sm">
+                            Simpan Peminjaman
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Return & Fine Calculator Modal Trigger -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-calculator text-rose-600"></i>
+                        <span>Kalkulator Denda & Pengembalian</span>
+                    </h3>
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 text-xs space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Tarif Denda Keterlambatan:</span>
+                            <span class="font-bold text-slate-800">Rp 1.000 / Hari</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Batas Maksimal Pinjam:</span>
+                            <span class="font-bold text-slate-800">14 Hari Kalender</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Cari ID Transaksi Peminjaman</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="returnSearchId" placeholder="ID Transaksi e.g. TRX-101" class="flex-1 px-3 py-2 text-xs border border-slate-300 rounded-lg">
+                            <button onclick="searchReturnTransaction()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg transition">
+                                Cek Status
+                            </button>
+                        </div>
+                    </div>
+                    <div id="returnSearchResult" class="hidden p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs space-y-2">
+                        <!-- Dynamic verification output -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Master Table: Active Loans & Approvals -->
+            <section class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-bold text-slate-800 text-sm">Daftar Transaksi Peminjaman Berjalan</h3>
+                    <button onclick="renderPustakawanTable()" class="text-xs text-brand-600 font-semibold hover:underline">
+                        <i class="fa-solid fa-rotate-right"></i> Refresh
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-600">
+                        <thead class="bg-slate-50 text-slate-700 uppercase font-semibold text-[11px] border-y border-slate-200">
+                            <tr>
+                                <th class="p-3">ID TRX</th>
+                                <th class="p-3">Peminjam</th>
+                                <th class="p-3">Buku</th>
+                                <th class="p-3">Batas Kembali</th>
+                                <th class="p-3">Status Late</th>
+                                <th class="p-3">Estimasi Denda</th>
+                                <th class="p-3 text-right">Aksi Pustakawan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pustakawanTableBody" class="divide-y divide-slate-100">
+                            <!-- Dynamic rendering -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- VIEW 3: KEPALA PERPUSTAKAAN (HEAD OF LIBRARY) EXECUTIVE DASHBOARD -->
+        <div id="viewKepala" class="space-y-8 hidden">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="px-2.5 py-1 bg-indigo-100 text-indigo-700 text-[11px] font-bold rounded-md">Laporan Eksekutif</span>
+                    <h1 class="text-2xl font-bold text-slate-800 mt-1">Dashboard Analitik Perpustakaan</h1>
+                    <p class="text-xs text-slate-500">Monitoring kinerja layanan, tren peminjaman, koleksi, dan kas denda.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.print()" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 font-bold text-xs rounded-xl shadow-sm hover:bg-slate-50 transition flex items-center gap-2">
+                        <i class="fa-solid fa-print"></i>
+                        <span>Cetak Laporan</span>
+                    </button>
+                    <button onclick="exportDataExcel()" class="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow hover:bg-emerald-700 transition flex items-center gap-2">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span>Export CSV</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Executive Metric Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-semibold text-slate-500">Total Koleksi Buku</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mt-1">1,420 Eksemplar</h3>
+                    <span class="text-[11px] text-emerald-600 font-medium">85% Buku Fisik, 15% E-Book</span>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-semibold text-slate-500">Total Anggota Terdaftar</p>
+                    <h3 class="text-2xl font-bold text-brand-600 mt-1">850 Anggota</h3>
+                    <span class="text-[11px] text-brand-600 font-medium">+12 Anggota baru bulan ini</span>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-semibold text-slate-500">Sirkulasi Peminjaman (Bulan ini)</p>
+                    <h3 class="text-2xl font-bold text-indigo-600 mt-1">312 Transaksi</h3>
+                    <span class="text-[11px] text-emerald-600 font-medium">↑ 14% dari bulan lalu</span>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-semibold text-slate-500">Total Kas Denda Terkumpul</p>
+                    <h3 class="text-2xl font-bold text-rose-600 mt-1">Rp 450.000</h3>
+                    <span class="text-[11px] text-slate-500 font-medium">Periode Tahun 2026</span>
+                </div>
+            </div>
+
+            <!-- Analytics Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Monthly Loan Trend Chart -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-800 text-sm">Tren Peminjaman Bulanan (2026)</h3>
+                    <div class="h-64 relative">
+                        <canvas id="loanTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Category Breakdown Chart -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-800 text-sm">Distribusi Kategori Minat Baca</h3>
+                    <div class="h-64 relative flex items-center justify-center">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 4: SYSTEM WORKFLOW DIAGRAM (5.F) -->
+        <section class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <h3 class="font-bold text-slate-800 text-base">Rancangan Alur Kerja Utama Sistem (5.F)</h3>
+                    <p class="text-xs text-slate-500">Diagram alir integrasi data antara Aktor, Sistem E-Library, dan Kepala Perpustakaan</p>
+                </div>
+                <span class="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg">Architecture Map</span>
+            </div>
+
+            <!-- Interactive Workflow Map -->
+            <div class="p-6 bg-slate-50 rounded-xl border border-slate-200 overflow-x-auto">
+                <div class="min-w-[700px] flex items-center justify-between gap-4 text-center">
+                    
+                    <!-- Node 1: Anggota -->
+                    <div class="w-40 p-4 bg-white rounded-xl border-2 border-brand-500 shadow-sm space-y-2">
+                        <div class="w-10 h-10 mx-auto rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-lg font-bold">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <h4 class="font-bold text-xs text-slate-800">1. Anggota</h4>
+                        <p class="text-[10px] text-slate-500">Cari, Reservasi, Pinjam, Baca E-book</p>
+                    </div>
+
+                    <i class="fa-solid fa-arrow-right text-brand-500 text-lg animate-pulse"></i>
+
+                    <!-- Node 2: Engine E-Library -->
+                    <div class="w-48 p-4 bg-brand-600 text-white rounded-xl shadow-md space-y-2">
+                        <div class="w-10 h-10 mx-auto rounded-full bg-white/20 flex items-center justify-center text-lg font-bold">
+                            <i class="fa-solid fa-server"></i>
+                        </div>
+                        <h4 class="font-bold text-xs">2. Engine E-Library</h4>
+                        <p class="text-[10px] text-brand-100">Cek Ketersediaan & Hitung Denda Otomatis</p>
+                    </div>
+
+                    <i class="fa-solid fa-arrow-right text-brand-500 text-lg animate-pulse"></i>
+
+                    <!-- Node 3: Database & Pustakawan -->
+                    <div class="w-44 p-4 bg-white rounded-xl border-2 border-emerald-500 shadow-sm space-y-2">
+                        <div class="w-10 h-10 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg font-bold">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+                        <h4 class="font-bold text-xs text-slate-800">3. Pustakawan</h4>
+                        <p class="text-[10px] text-slate-500">Validasi Peminjaman & Pengembalian</p>
+                    </div>
+
+                    <i class="fa-solid fa-arrow-right text-brand-500 text-lg animate-pulse"></i>
+
+                    <!-- Node 4: Kepala Perpustakaan -->
+                    <div class="w-40 p-4 bg-white rounded-xl border-2 border-indigo-500 shadow-sm space-y-2">
+                        <div class="w-10 h-10 mx-auto rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg font-bold">
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </div>
+                        <h4 class="font-bold text-xs text-slate-800">4. Laporan Kepala</h4>
+                        <p class="text-[10px] text-slate-500">Dashboard & Laporan Eksekutif</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL 1: LOGIN MODAL (5.A) -->
+    <div id="loginModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative space-y-6">
+            <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center mx-auto text-xl font-bold">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800">Masuk Akun E-Library</h3>
+                <p class="text-xs text-slate-500">Gunakan email & kata sandi yang telah terdaftar</p>
+            </div>
+
+            <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Email / ID Anggota</label>
+                    <input type="email" required id="loginEmail" value="siti@email.com" class="w-full px-3 py-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Kata Sandi</label>
+                    <input type="password" required value="password123" class="w-full px-3 py-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked class="rounded text-brand-600">
+                        <span class="text-slate-600">Ingat saya</span>
+                    </label>
+                    <a href="#" onclick="alert('Instruksi reset sandi telah dikirim ke email.')" class="text-brand-600 font-semibold hover:underline">Lupa Password?</a>
+                </div>
+                <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl transition shadow-md">
+                    LOGIN SEKARANG
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: BOOK DETAIL & RESERVATION MODAL (5.C) -->
+    <div id="bookDetailModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative space-y-6 overflow-hidden max-h-[90vh] overflow-y-auto">
+            <button onclick="closeBookDetailModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 z-10">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div id="modalBookContent" class="space-y-6">
+                <!-- Dynamic content populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: IN-APP E-BOOK READER MODAL (5.E) -->
+    <div id="ebookReaderModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col hidden">
+        <!-- Reader Toolbar -->
+        <div class="bg-slate-900 border-b border-slate-800 px-6 py-3 flex items-center justify-between text-white">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-sm font-bold">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <div>
+                    <h4 id="readerBookTitle" class="text-xs font-bold">Belajar Pemrograman Python</h4>
+                    <p class="text-[10px] text-slate-400">E-Book Digital Interactive Reader</p>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center gap-4 text-xs">
+                <button onclick="toggleReaderTheme()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300">
+                    <i class="fa-solid fa-moon mr-1"></i> Mode Baca
+                </button>
+                <div class="flex items-center gap-2 bg-slate-800 px-3 py-1 rounded-lg">
+                    <span>Hal:</span>
+                    <button onclick="changeEbookPage(-1)" class="hover:text-emerald-400"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span id="currentPageNum" class="font-bold text-emerald-400">1</span>
+                    <span>/</span>
+                    <span id="totalPagesNum">45</span>
+                    <button onclick="changeEbookPage(1)" class="hover:text-emerald-400"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <button onclick="closeEbookReader()" class="px-3 py-1 bg-rose-600 hover:bg-rose-700 rounded-lg font-bold">
+                    Tutup
+                </button>
+            </div>
+        </div>
+
+        <!-- Reader Page Canvas -->
+        <div class="flex-1 overflow-y-auto p-4 sm:p-8 flex justify-center bg-slate-950">
+            <div id="readerPageCanvas" class="bg-white text-slate-800 w-full max-w-3xl min-h-[600px] p-8 sm:p-12 rounded-xl shadow-2xl space-y-6 font-serif leading-relaxed text-sm sm:text-base">
+                <div class="border-b border-slate-200 pb-4 flex justify-between items-center text-xs text-slate-400 font-sans">
+                    <span>BAB 1: Pengenalan Dasar</span>
+                    <span>E-LIBRARY DIGITAL</span>
+                </div>
+                <h2 id="readerChapterTitle" class="text-xl font-bold font-sans text-slate-900">Bab 1: Konsep Dasar Pemrograman & Algoritma</h2>
+                <p>
+                    Pemrograman adalah proses menulis, menguji, memperbaiki (debug), dan memelihara kode yang membangun suatu program komputer. Kode ini ditulis dalam bahasa pemrogaraman yang dimengerti mesin.
+                </p>
+                <div class="p-4 bg-slate-100 rounded-lg font-mono text-xs text-brand-700">
+                    # Contoh Kode Python Pertama<br>
+                    def sapa_anggota(nama):<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;return f"Selamat Datang di E-Library, {nama}!"<br><br>
+                    print(sapa_anggota("Siti"))
+                </div>
+                <p>
+                    Dalam konteks Perpustakaan Digital, integrasi antara basis data dan antarmuka pengguna memungkinkan pencarian judul buku secara cepat dalam hitungan milidetik.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: ADD NEW BOOK MODAL -->
+    <div id="addBookModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeAddBookModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h3 class="text-lg font-bold text-slate-800">Tambah Koleksi Buku Baru</h3>
+            <form onsubmit="handleAddBookSubmit(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Judul Buku</label>
+                    <input type="text" id="newBookTitle" required placeholder="Judul buku lengkap" class="w-full px-3 py-2 text-xs border rounded-lg">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Penulis</label>
+                        <input type="text" id="newBookAuthor" required placeholder="Nama penulis" class="w-full px-3 py-2 text-xs border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Kategori</label>
+                        <select id="newBookCategory" class="w-full px-3 py-2 text-xs border rounded-lg">
+                            <option value="Teknologi">Teknologi</option>
+                            <option value="Sains">Sains</option>
+                            <option value="Bisnis">Bisnis</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Format Koleksi</label>
+                        <select id="newBookType" class="w-full px-3 py-2 text-xs border rounded-lg">
+                            <option value="Fisik">Buku Fisik</option>
+                            <option value="Digital">E-Book Digital</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Jumlah Stok Eksemplar</label>
+                        <input type="number" id="newBookStock" value="5" min="1" class="w-full px-3 py-2 text-xs border rounded-lg">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow">
+                    Simpan ke Katalog
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        // APP STATE STORE
+        const state = {
+            currentRole: 'anggota', // 'anggota', 'pustakawan', 'kepala'
+            isWireframeMode: false,
+            activeCategoryFilter: 'all',
+            books: [
+                {
+                    id: 'BK-101',
+                    title: 'Pemrograman Python Modern',
+                    author: 'Guido van Rossum',
+                    category: 'Teknologi',
+                    type: 'Fisik',
+                    stock: 5,
+                    rating: 4.8,
+                    cover: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=400&q=80',
+                    synopsis: 'Panduan lengkap mempelajari konsep dasar Python 3, struktur data, dan pengembangan backend web interaktif.'
+                },
+                {
+                    id: 'BK-102',
+                    title: 'Sains Data & AI untuk Pemula',
+                    author: 'Dr. Ahmad Fauzi',
+                    category: 'Sains',
+                    type: 'Digital',
+                    stock: 99,
+                    rating: 4.9,
+                    cover: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80',
+                    synopsis: 'E-Book interaktif mengenai dasar algoritma pembelajaran mesin dan manipulasi dataset menggunakan Pandas.'
+                },
+                {
+                    id: 'BK-103',
+                    title: 'Manajemen Bisnis Digital',
+                    author: 'Siti Nurhaliza, M.M.',
+                    category: 'Bisnis',
+                    type: 'Fisik',
+                    stock: 2,
+                    rating: 4.6,
+                    cover: 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=400&q=80',
+                    synopsis: 'Strategi pemasaran dan pengelolaan startup digital di era pergeseran ekonomi global.'
+                },
+                {
+                    id: 'BK-104',
+                    title: 'Algoritma & Struktur Data',
+                    author: 'Prof. Budi Santoso',
+                    category: 'Teknologi',
+                    type: 'Digital',
+                    stock: 99,
+                    rating: 4.7,
+                    cover: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=400&q=80',
+                    synopsis: 'Pemahaman mendalam mengenai manipulasi Array, Linked List, Tree, dan metode Pencarian Efisien.'
+                }
+            ],
+            loans: [
+                {
+                    trxId: 'TRX-101',
+                    member: 'Siti Rahma (AGT-001)',
+                    bookId: 'BK-101',
+                    bookTitle: 'Pemrograman Python Modern',
+                    loanDate: '2026-09-15',
+                    dueDate: '2026-09-29', // Overdue
+                    status: 'Dipinjam',
+                    lateDays: 4,
+                    fineAmount: 4000
+                },
+                {
+                    trxId: 'TRX-102',
+                    member: 'Siti Rahma (AGT-001)',
+                    bookId: 'BK-103',
+                    bookTitle: 'Manajemen Bisnis Digital',
+                    loanDate: '2026-10-01',
+                    dueDate: '2026-10-15',
+                    status: 'Dipinjam',
+                    lateDays: 0,
+                    fineAmount: 0
+                }
+            ]
+        };
+
+        // ON PAGE LOAD INITIALIZATION
+        window.onload = function() {
+            renderBookCatalog();
+            renderMemberLoans();
+            renderPustakawanTable();
+            populateBookSelectOptions();
+            initExecutiveCharts();
+        };
+
+        // WIREFRAME TOGGLE LOGIC
+        function toggleWireframeMode() {
+            state.isWireframeMode = !state.isWireframeMode;
+            document.body.classList.toggle('wireframe-mode', state.isWireframeMode);
+            const statusText = document.getElementById('wireframeStatusText');
+            statusText.innerText = state.isWireframeMode ? 'Low-Fi Blueprint' : 'Hi-Fi Modern';
+            showToast(state.isWireframeMode ? 'Tampilan beralih ke Mode Wireframe (Blueprint)' : 'Tampilan beralih ke Mode Modern (Hi-Fi)');
+        }
+
+        // ROLE SWITCHING LOGIC
+        function changeUserRole(role) {
+            state.currentRole = role;
+            
+            // Hide all view containers
+            document.getElementById('viewAnggota').classList.add('hidden');
+            document.getElementById('viewPustakawan').classList.add('hidden');
+            document.getElementById('viewKepala').classList.add('hidden');
+
+            const label = document.getElementById('activeRoleLabel');
+            const hint = document.getElementById('roleHintText');
+
+            if (role === 'anggota') {
+                document.getElementById('viewAnggota').classList.remove('hidden');
+                label.innerText = 'Anggota Perpustakaan (Siti Rahma)';
+                hint.innerText = 'Akses: Katalog, Peminjaman, E-book Reader, Reservasi, & Denda';
+            } else if (role === 'pustakawan') {
+                document.getElementById('viewPustakawan').classList.remove('hidden');
+                label.innerText = 'Pustakawan / Petugas Sirkulasi';
+                hint.innerText = 'Akses: Kelola Peminjaman, Pengembalian, Kalkulasi Denda, & Stok';
+                renderPustakawanTable();
+            } else if (role === 'kepala') {
+                document.getElementById('viewKepala').classList.remove('hidden');
+                label.innerText = 'Kepala Perpustakaan Daerah';
+                hint.innerText = 'Akses: Laporan Eksekutif, Grafik Analitik, & Statistik Kas Denda';
+            }
+            showToast(`Role aktif diubah menjadi: ${role.toUpperCase()}`);
+        }
+
+        // RENDER BOOK CATALOG
+        function renderBookCatalog() {
+            const grid = document.getElementById('bookGrid');
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const typeFilter = document.getElementById('typeFilter').value;
+
+            grid.innerHTML = '';
+
+            const filtered = state.books.filter(b => {
+                const matchCategory = state.activeCategoryFilter === 'all' || 
+                                     (state.activeCategoryFilter === 'E-Book' ? b.type === 'Digital' : b.category === state.activeCategoryFilter);
+                const matchType = typeFilter === 'all' || b.type === typeFilter;
+                const matchQuery = b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query);
+                return matchCategory && matchType && matchQuery;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-400">
+                        <i class="fa-solid fa-book-open-reader text-4xl mb-2"></i>
+                        <p class="text-sm">Tidak ada koleksi buku yang cocok dengan kata kunci/filter.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(book => {
+                const isEbook = book.type === 'Digital';
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between group';
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="relative h-48 bg-slate-100 overflow-hidden">
+                            <img src="${book.cover}" alt="${book.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/400x600/1e293b/ffffff?text=Buku+Digital'">
+                            <span class="absolute top-3 left-3 px-2.5 py-1 text-[10px] font-bold rounded-md ${isEbook ? 'bg-emerald-600 text-white' : 'bg-brand-600 text-white'} shadow-md">
+                                ${isEbook ? '📖 E-BOOK' : '📚 FISIK'}
+                            </span>
+                            <span class="absolute top-3 right-3 px-2 py-0.5 text-[10px] font-bold rounded bg-slate-900/70 text-amber-300 backdrop-blur-md">
+                                ★ ${book.rating}
+                            </span>
+                        </div>
+                        <div class="p-4 space-y-2">
+                            <span class="text-[10px] font-semibold text-brand-600 uppercase tracking-wider">${book.category}</span>
+                            <h3 class="font-bold text-sm text-slate-800 line-clamp-1">${book.title}</h3>
+                            <p class="text-xs text-slate-500 font-medium">Oleh: ${book.author}</p>
+                            <p class="text-xs text-slate-400 line-clamp-2 mt-1">${book.synopsis}</p>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0 border-t border-slate-100 mt-2 flex items-center justify-between gap-2">
+                        <span class="text-[11px] ${book.stock > 0 ? 'text-emerald-600 font-bold' : 'text-rose-500 font-bold'}">
+                            ${isEbook ? 'Akses Instan' : (book.stock > 0 ? `Stok: ${book.stock}` : 'Dipinjam')}
+                        </span>
+                        <div class="flex items-center gap-1">
+                            <button onclick="openBookDetail('${book.id}')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition">
+                                Detail
+                            </button>
+                            ${isEbook ? 
+                                `<button onclick="openEbookReader('${book.title}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition">Baca</button>` :
+                                `<button onclick="handleReservation('${book.id}')" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg transition">Pinjam</button>`
+                            }
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // FILTER CATEGORY CHIPS
+        function setCategoryFilter(category) {
+            state.activeCategoryFilter = category;
+            document.querySelectorAll('.cat-chip').forEach(btn => {
+                btn.classList.remove('bg-white/30', 'bg-emerald-500/80');
+            });
+            renderBookCatalog();
+        }
+
+        function filterBooks() {
+            renderBookCatalog();
+        }
+
+        // RENDER MEMBER LOANS TABLE
+        function renderMemberLoans() {
+            const tbody = document.getElementById('memberLoansTable');
+            tbody.innerHTML = '';
+
+            state.loans.forEach(loan => {
+                const tr = document.createElement('tr');
+                const isOverdue = loan.lateDays > 0;
+
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-slate-800">${loan.bookTitle}</td>
+                    <td class="p-3">${loan.loanDate}</td>
+                    <td class="p-3 ${isOverdue ? 'text-rose-600 font-bold' : ''}">${loan.dueDate}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isOverdue ? 'bg-rose-100 text-rose-700' : 'bg-brand-100 text-brand-700'}">
+                            ${isOverdue ? 'Terlambat' : loan.status}
+                        </span>
+                    </td>
+                    <td class="p-3 font-semibold ${isOverdue ? 'text-rose-600' : 'text-slate-500'}">
+                        ${isOverdue ? `Rp ${loan.fineAmount.toLocaleString('id-ID')}` : 'Rp 0'}
+                    </td>
+                    <td class="p-3 text-right">
+                        <button onclick="triggerReturnFromMember('${loan.trxId}')" class="px-3 py-1 bg-slate-800 text-white text-[11px] font-bold rounded hover:bg-slate-700">
+                            Kembalikan
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // RENDER PUSTAKAWAN MASTER TABLE
+        function renderPustakawanTable() {
+            const tbody = document.getElementById('pustakawanTableBody');
+            tbody.innerHTML = '';
+
+            state.loans.forEach(loan => {
+                const tr = document.createElement('tr');
+                const isOverdue = loan.lateDays > 0;
+
+                tr.innerHTML = `
+                    <td class="p-3 font-mono font-bold text-brand-600">${loan.trxId}</td>
+                    <td class="p-3">${loan.member}</td>
+                    <td class="p-3 font-semibold">${loan.bookTitle}</td>
+                    <td class="p-3">${loan.dueDate}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isOverdue ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">
+                            ${isOverdue ? `Late ${loan.lateDays} Hari` : 'Tepat Waktu'}
+                        </span>
+                    </td>
+                    <td class="p-3 font-bold ${isOverdue ? 'text-rose-600' : 'text-slate-500'}">
+                        Rp ${loan.fineAmount.toLocaleString('id-ID')}
+                    </td>
+                    <td class="p-3 text-right">
+                        <button onclick="processReturnSuccess('${loan.trxId}')" class="px-3 py-1 bg-emerald-600 text-white text-[11px] font-bold rounded hover:bg-emerald-700">
+                            Verifikasi Kembali
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // POPULATE BOOK SELECT OPTIONS IN FORM
+        function populateBookSelectOptions() {
+            const select = document.getElementById('loanBookSelect');
+            select.innerHTML = '';
+            state.books.forEach(b => {
+                const opt = document.createElement('option');
+                opt.value = b.id;
+                opt.innerText = `${b.title} (${b.type} - Stok: ${b.stock})`;
+                select.appendChild(opt);
+            });
+        }
+
+        // HANDLE PROCESS LOAN SUBMIT
+        function handleProcessLoan(e) {
+            e.preventDefault();
+            const member = document.getElementById('loanMemberId').value;
+            const bookId = document.getElementById('loanBookSelect').value;
+            const book = state.books.find(b => b.id === bookId);
+
+            if (!book) return;
+
+            const newTrx = {
+                trxId: 'TRX-' + Math.floor(100 + Math.random() * 900),
+                member: member,
+                bookId: book.id,
+                bookTitle: book.title,
+                loanDate: document.getElementById('loanStartDate').value,
+                dueDate: document.getElementById('loanDueDate').value,
+                status: 'Dipinjam',
+                lateDays: 0,
+                fineAmount: 0
+            };
+
+            state.loans.unshift(newTrx);
+            renderMemberLoans();
+            renderPustakawanTable();
+            showToast(`Peminjaman berhasil dicatat! TRX: ${newTrx.trxId}`);
+        }
+
+        // SEARCH RETURN TRANSACTION (LIBRARIAN)
+        function searchReturnTransaction() {
+            const input = document.getElementById('returnSearchId').value.trim();
+            const resDiv = document.getElementById('returnSearchResult');
+            const loan = state.loans.find(l => l.trxId.toLowerCase() === input.toLowerCase());
+
+            resDiv.classList.remove('hidden');
+            if (loan) {
+                resDiv.innerHTML = `
+                    <p class="font-bold text-slate-800">Detail Peminjaman Found:</p>
+                    <p>Buku: <strong>${loan.bookTitle}</strong></p>
+                    <p>Peminjam: ${loan.member}</p>
+                    <p>Jatuh Tempo: ${loan.dueDate}</p>
+                    <p class="${loan.lateDays > 0 ? 'text-rose-600 font-bold' : 'text-emerald-600 font-bold'}">
+                        Denda Keterlambatan: Rp ${loan.fineAmount.toLocaleString('id-ID')} (${loan.lateDays} Hari Late)
+                    </p>
+                    <button onclick="processReturnSuccess('${loan.trxId}')" class="w-full py-1.5 bg-emerald-600 text-white font-bold rounded mt-2">
+                        Bayar Denda & Selesaikan Transaksi
+                    </button>
+                `;
+            } else {
+                resDiv.innerHTML = `<p class="text-rose-600 font-bold">ID Transaksi tidak ditemukan!</p>`;
+            }
+        }
+
+        function processReturnSuccess(trxId) {
+            state.loans = state.loans.filter(l => l.trxId !== trxId);
+            renderMemberLoans();
+            renderPustakawanTable();
+            document.getElementById('returnSearchResult').classList.add('hidden');
+            showToast(`Pengembalian transaksi ${trxId} berhasil diproses! Status buku diperbarui.`);
+        }
+
+        function triggerReturnFromMember(trxId) {
+            processReturnSuccess(trxId);
+        }
+
+        function handleReservation(bookId) {
+            const book = state.books.find(b => b.id === bookId);
+            showToast(`Permintaan reservasi buku "${book.title}" dikirim ke Pustakawan!`);
+        }
+
+        // MODAL CONTROLS
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+        }
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            closeLoginModal();
+            showToast('Berhasil masuk ke akun E-Library!');
+        }
+
+        function openBookDetail(bookId) {
+            const book = state.books.find(b => b.id === bookId);
+            const content = document.getElementById('modalBookContent');
+
+            content.innerHTML = `
+                <div class="flex flex-col sm:flex-row gap-6">
+                    <img src="${book.cover}" alt="${book.title}" class="w-full sm:w-48 h-64 object-cover rounded-xl shadow-lg">
+                    <div class="space-y-3 flex-1">
+                        <span class="px-2.5 py-1 bg-brand-100 text-brand-700 text-xs font-bold rounded-md uppercase">${book.category}</span>
+                        <h2 class="text-2xl font-bold text-slate-800 leading-tight">${book.title}</h2>
+                        <p class="text-xs text-slate-500 font-medium">Penulis: ${book.author}</p>
+                        <div class="flex items-center gap-4 text-xs py-2 border-y border-slate-100">
+                            <div><span class="text-slate-400 block">Format:</span> <strong class="text-slate-700">${book.type}</strong></div>
+                            <div><span class="text-slate-400 block">Rating:</span> <strong class="text-amber-500">★ ${book.rating}</strong></div>
+                            <div><span class="text-slate-400 block">Ketersediaan:</span> <strong class="text-emerald-600">${book.stock} Stok</strong></div>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-800 mb-1">Sinopsis Buku:</h4>
+                            <p class="text-xs text-slate-600 leading-relaxed">${book.synopsis}</p>
+                        </div>
+                        <div class="pt-2 flex gap-2">
+                            ${book.type === 'Digital' ? 
+                                `<button onclick="closeBookDetailModal(); openEbookReader('${book.title}')" class="w-full py-2.5 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow">BACA E-BOOK SEKARANG</button>` :
+                                `<button onclick="closeBookDetailModal(); handleReservation('${book.id}')" class="w-full py-2.5 bg-brand-600 text-white font-bold text-xs rounded-xl shadow">AJUKAN RESERVASI / PINJAM</button>`
+                            }
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('bookDetailModal').classList.remove('hidden');
+        }
+        function closeBookDetailModal() {
+            document.getElementById('bookDetailModal').classList.add('hidden');
+        }
+
+        // E-BOOK READER CONTROLS (5.E)
+        let currentEbookPage = 1;
+        function openEbookReader(title) {
+            document.getElementById('readerBookTitle').innerText = title;
+            currentEbookPage = 1;
+            document.getElementById('currentPageNum').innerText = currentEbookPage;
+            document.getElementById('ebookReaderModal').classList.remove('hidden');
+        }
+        function closeEbookReader() {
+            document.getElementById('ebookReaderModal').classList.add('hidden');
+        }
+        function changeEbookPage(delta) {
+            currentEbookPage = Math.max(1, Math.min(45, currentEbookPage + delta));
+            document.getElementById('currentPageNum').innerText = currentEbookPage;
+        }
+        function toggleReaderTheme() {
+            const canvas = document.getElementById('readerPageCanvas');
+            canvas.classList.toggle('bg-white');
+            canvas.classList.toggle('bg-slate-900');
+            canvas.classList.toggle('text-slate-800');
+            canvas.classList.toggle('text-slate-200');
+        }
+
+        // ADD BOOK MODAL
+        function openAddBookModal() {
+            document.getElementById('addBookModal').classList.remove('hidden');
+        }
+        function closeAddBookModal() {
+            document.getElementById('addBookModal').classList.add('hidden');
+        }
+        function handleAddBookSubmit(e) {
+            e.preventDefault();
+            const newBook = {
+                id: 'BK-' + Math.floor(100 + Math.random() * 900),
+                title: document.getElementById('newBookTitle').value,
+                author: document.getElementById('newBookAuthor').value,
+                category: document.getElementById('newBookCategory').value,
+                type: document.getElementById('newBookType').value,
+                stock: parseInt(document.getElementById('newBookStock').value),
+                rating: 5.0,
+                cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80',
+                synopsis: 'Koleksi baru yang ditambahkan oleh Pustakawan.'
+            };
+            state.books.unshift(newBook);
+            renderBookCatalog();
+            populateBookSelectOptions();
+            closeAddBookModal();
+            showToast('Buku baru berhasil ditambahkan ke katalog!');
+        }
+
+        // CHART.JS INITIALIZATION FOR KEPALA PERPUSTAKAAN DASHBOARD
+        function initExecutiveCharts() {
+            // Trend Line Chart
+            const ctx1 = document.getElementById('loanTrendChart')?.getContext('2d');
+            if (ctx1) {
+                new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt'],
+                        datasets: [{
+                            label: 'Jumlah Peminjaman',
+                            data: [180, 210, 240, 220, 290, 310, 280, 330, 350, 312],
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            // Category Doughnut Chart
+            const ctx2 = document.getElementById('categoryChart')?.getContext('2d');
+            if (ctx2) {
+                new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Teknologi & IT', 'Sains & Data', 'Bisnis & Ekonomi', 'Sastra & Lainnya'],
+                        datasets: [{
+                            data: [45, 25, 20, 10],
+                            backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#64748b']
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+        }
+
+        // EXPORT DATA CSV
+        function exportDataExcel() {
+            showToast('Mengeksport laporan peminjaman ke format CSV/Excel...');
+        }
+
+        function triggerQuickScan() {
+            showToast('Kamera Barcode Scanner diaktifkan...');
+        }
+
+        function toggleNotificationDropdown() {
+            showToast('Notifikasi: 1 Buku mendekati jatuh tempo pada 15-Okt-2026');
+        }
+
+        // UTILITY TOAST MESSAGES
+        function showToast(message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 transition transform translate-y-2 opacity-0 pointer-events-auto';
+            toast.innerHTML = `<i class="fa-solid fa-circle-info text-brand-400"></i> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
